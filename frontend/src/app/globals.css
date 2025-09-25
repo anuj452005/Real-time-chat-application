@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/* WhatsApp-like theme overrides */
+body {
+  background: #111b21;
+  color: #e9edef;
+}
+
+/* Chat sidebar */
+.bg-gray-900 {
+  background: #202c33 !important;
+}
+.border-gray-700 {
+  border-color: #2a3942 !important;
+}
+
+/* Chat header */
+.bg-gray-800 {
+  background: #2a3942 !important;
+}
+
+/* Chat area */
+.bg-white\/5 {
+  background: #0b141a !important;
+}
+
+/* Chat bubbles */
+.bg-blue-600 {
+  background: #005c4b !important;
+}
+.bg-gray-700 {
+  background: #202c33 !important;
+}
+
+/* Message input */
+.border-t {
+  border-top: 1.5px solid #2a3942 !important;
+}
+.bg-gray-700 {
+  background: #2a3942 !important;
+}
+
+/* Chat text colors */
+.text-white {
+  color: #e9edef !important;
+}
+.text-gray-400 {
+  color: #8696a0 !important;
+}
+.text-gray-200 {
+  color: #d1d7db !important;
+}
+
+/* Custom scroll for chat */
+.custom-scroll::-webkit-scrollbar {
+  width: 8px;
+  background: #202c33;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #2a3942;
+  border-radius: 8px;
+}
+
+/* Chat bubble border radius for WhatsApp look */
+.rounded-lg {
+  border-radius: 18px !important;
+}
+
+/* Chat sidebar selected chat */
+.bg-blue-600 {
+  background: #005c4b !important;
+}
+.border-blue-500 {
+  border-color: #005c4b !important;
+}
+
+/* Send button */
+.bg-blue-600:hover, .hover\:bg-blue-700:hover {
+  background: #025144 !important;
+}
+
+/* Online dot */
+.bg-green-500 {
+  background: #25d366 !important;
+}
+
+/* Unseen badge */
+.bg-red-600 {
+  background: #ea0038 !important;
+}
+
+/* New chat button */
+.bg-green-600 {
+  background: #25d366 !important;
+}
+.bg-green-600:hover, .hover\:bg-green-700:hover {
+  background: #1da851 !important;
+}
+
+/* Remove blue focus ring */
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
