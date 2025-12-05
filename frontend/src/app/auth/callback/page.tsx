@@ -3,6 +3,7 @@ import Loading from "@/components/Loading";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 import toast from "react-hot-toast";
+import Cookies from "js-cookie";
 
 const AuthCallbackContent = () => {
     const router = useRouter();
@@ -12,8 +13,12 @@ const AuthCallbackContent = () => {
         const token = searchParams.get("token");
 
         if (token) {
-            // Store the token in localStorage
-            localStorage.setItem("token", JSON.stringify(token));
+            // Store the token in cookies (matching the rest of the app)
+            Cookies.set("token", token, {
+                expires: 15,
+                secure: false,
+                path: "/",
+            });
             toast.success("Successfully signed in with Google!");
 
             // Redirect to chat page
