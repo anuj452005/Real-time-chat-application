@@ -1,7 +1,7 @@
 "use client";
 import Loading from "@/components/Loading";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
 import { useAppData } from "@/context/AppContext";
@@ -10,9 +10,14 @@ const AuthCallbackContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { setUser, setIsAuth, fetchChats, fetchUsers } = useAppData();
+    const hasProcessed = useRef(false);
 
     useEffect(() => {
         const handleAuth = async () => {
+            // Prevent running multiple times
+            if (hasProcessed.current) return;
+            hasProcessed.current = true;
+
             const token = searchParams.get("token");
 
             if (token) {
