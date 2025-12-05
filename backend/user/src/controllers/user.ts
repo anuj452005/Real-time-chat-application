@@ -25,7 +25,7 @@ export const loginUser = TryCatch(async (req, res) => {
   });
 
   await redisClient.set(rateLimitKey, "true", {
-    ex: 1, // Rate limit: 10 seconds between OTP requests
+    ex: 60, // Rate limit: 60 seconds between OTP requests
   });
 
   const message = {
@@ -150,6 +150,6 @@ export const googleAuthCallback = TryCatch<AuthenticatedRequest>(async (req, res
   const token = generateToken(user);
 
   // Redirect to frontend with token
-  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+  const frontendUrl = process.env.CLIENT_URL || "http://localhost:3000";
   res.redirect(`${frontendUrl}/auth/callback?token=${token}`);
 });
