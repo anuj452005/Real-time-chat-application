@@ -21,7 +21,7 @@ const ProfilePage = () => {
     setName(user?.name);
   };
 
-  const submitHandler = async (e: any) => {
+  const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = Cookies.get("token");
     try {
@@ -44,8 +44,12 @@ const ProfilePage = () => {
       toast.success(data.message);
       setUser(data.user);
       setIsEdit(false);
-    } catch (error: any) {
-      toast.error(error.response.data.message);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     }
   };
 

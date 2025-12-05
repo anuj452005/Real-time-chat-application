@@ -3,6 +3,7 @@ import { User } from "@/context/AppContext";
 import React, { useEffect, useMemo, useRef } from "react";
 import moment from "moment";
 import { Check, CheckCheck } from "lucide-react";
+import Image from "next/image";
 
 interface ChatMessagesProps {
   selectedUser: string | null;
@@ -48,23 +49,23 @@ const ChatMessages = ({
 
               return (
                 <div
-                  className={`flex flex-col gap-1 mt-2 ${
-                    isSentByMe ? "items-end" : "items-start"
-                  }`}
+                  className={`flex flex-col gap-1 mt-2 ${isSentByMe ? "items-end" : "items-start"
+                    }`}
                   key={uniqueKey}
                 >
                   <div
-                    className={`rounded-lg p-3 max-w-sm ${
-                      isSentByMe
+                    className={`rounded-lg p-3 max-w-sm ${isSentByMe
                         ? "bg-blue-600 text-white"
                         : "bg-gray-700 text-white"
-                    }`}
+                      }`}
                   >
                     {e.messageType === "image" && e.image && (
                       <div className="relative group">
-                        <img
+                        <Image
                           src={e.image.url}
                           alt="shared image"
+                          width={300}
+                          height={300}
                           className="max-w-full h-auto rounded-lg"
                         />
                       </div>
@@ -74,9 +75,8 @@ const ChatMessages = ({
                   </div>
 
                   <div
-                    className={`flex items-center gap-1 text-xs text-gray-400 ${
-                      isSentByMe ? "pr-2 flex-row-reverse" : "pl-2"
-                    }`}
+                    className={`flex items-center gap-1 text-xs text-gray-400 ${isSentByMe ? "pr-2 flex-row-reverse" : "pl-2"
+                      }`}
                   >
                     <span>{moment(e.createdAt).format("hh:mm A . MMM D")}</span>
 

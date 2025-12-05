@@ -1,11 +1,12 @@
 import { Loader2, Paperclip, Send, X } from "lucide-react";
+import Image from "next/image";
 import React, { useState } from "react";
 
 interface MessageInputProps {
   selectedUser: string | null;
   message: string;
   setMessage: (message: string) => void;
-  handleMessageSend: (e: any, imageFile?: File | null) => void;
+  handleMessageSend: (e: React.FormEvent, imageFile?: File | null) => void;
 }
 
 const MessageInput = ({
@@ -17,7 +18,7 @@ const MessageInput = ({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() && !imageFile) return;
 
@@ -35,9 +36,11 @@ const MessageInput = ({
     >
       {imageFile && (
         <div className="relative w-fit">
-          <img
+          <Image
             src={URL.createObjectURL(imageFile)}
             alt="preview"
+            width={96}
+            height={96}
             className="w-24 h-24 object-cover rounded-lg border border-gray-600"
           />
           <button

@@ -27,8 +27,12 @@ const LoginPage = () => {
 
       toast.success(data.message);
       router.push(`/verify?email=${email}`);
-    } catch (error: any) {
-      toast.error(error.response.data.message);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }

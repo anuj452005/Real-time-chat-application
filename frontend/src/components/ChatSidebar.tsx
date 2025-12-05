@@ -1,8 +1,7 @@
-import { User } from "@/context/AppContext";
+import { User, Chats } from "@/context/AppContext";
 import {
   CornerDownRight,
   CornerUpLeft,
-  Divide,
   LogOut,
   MessageCircle,
   Plus,
@@ -20,7 +19,7 @@ interface ChatSidebarProps {
   setShowAllUsers: (show: boolean | ((prev: boolean) => boolean)) => void;
   users: User[] | null;
   loggedInUser: User | null;
-  chats: any[] | null;
+  chats: Chats[] | null;
   selectedUser: string | null;
   setSelectedUser: (userId: string | null) => void;
   handleLogout: () => void;
@@ -46,9 +45,8 @@ const ChatSidebar = ({
 
   return (
     <aside
-      className={`fixed z-20 sm:static top-0 left-0 h-screen w-80 bg-gray-900 border-r border-gray-700 transform ${
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } sm:translate-x-0 transition-transform duration-300 flex flex-col`}
+      className={`fixed z-20 sm:static top-0 left-0 h-screen w-80 bg-gray-900 border-r border-gray-700 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } sm:translate-x-0 transition-transform duration-300 flex flex-col`}
     >
       {/* header */}
       <div className="p-6 border-b border-gray-700">
@@ -72,11 +70,10 @@ const ChatSidebar = ({
           </div>
 
           <button
-            className={`p-2.5 rounded-lg transition-colors ${
-              showAllUsers
-                ? "bg-red-600 hover:bg-red-700 text-white"
-                : "bg-green-600 hover:bg-green-700 text-white"
-            }`}
+            className={`p-2.5 rounded-lg transition-colors ${showAllUsers
+              ? "bg-red-600 hover:bg-red-700 text-white"
+              : "bg-green-600 hover:bg-green-700 text-white"
+              }`}
             onClick={() => setShowAllUsers((prev) => !prev)}
           >
             {showAllUsers ? (
@@ -154,11 +151,10 @@ const ChatSidebar = ({
                     setSelectedUser(chat.chat._id);
                     setSidebarOpen(false);
                   }}
-                  className={`w-full text-left p-4 rounded-lg transition-colors ${
-                    isSelected
-                      ? "bg-blue-600 border border-blue-500"
-                      : "border border-gray-700 hover:border-gray-600"
-                  }`}
+                  className={`w-full text-left p-4 rounded-lg transition-colors ${isSelected
+                    ? "bg-blue-600 border border-blue-500"
+                    : "border border-gray-700 hover:border-gray-600"
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative">
@@ -173,9 +169,8 @@ const ChatSidebar = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <span
-                          className={`font-semibold truncate ${
-                            isSelected ? "text-white" : "text-gray-200"
-                          }`}
+                          className={`font-semibold truncate ${isSelected ? "text-white" : "text-gray-200"
+                            }`}
                         >
                           {chat.user.name}
                         </span>

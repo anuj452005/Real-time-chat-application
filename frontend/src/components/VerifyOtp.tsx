@@ -97,8 +97,12 @@ const VerifyOtp = () => {
       setIsAuth(true);
       fetchChats();
       fetchUsers();
-    } catch (error: any) {
-      setError(error.response.data.message);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        setError(error.response.data.message);
+      } else {
+        setError("An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -113,8 +117,12 @@ const VerifyOtp = () => {
       });
       toast.success(data.message);
       setTimer(60);
-    } catch (error: any) {
-      setError(error.response.data.message);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        setError(error.response.data.message);
+      } else {
+        setError("An unexpected error occurred");
+      }
     } finally {
       setResendLoading(false);
     }
@@ -195,7 +203,7 @@ const VerifyOtp = () => {
 
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm mb-4">
-              Din't receive the code?
+              Didn&apos;t receive the code?
             </p>
             {timer > 0 ? (
               <p className="text-gray-400 text-sm">

@@ -85,7 +85,7 @@ const ChatApp = () => {
 
   const moveChatToTop = (
     chatId: string,
-    newMessage: any,
+    newMessage: Partial<Message> & { text?: string; sender: string },
     updatedUnseenCount = true
   ) => {
     setChats((prev) => {
@@ -104,7 +104,7 @@ const ChatApp = () => {
           chat: {
             ...moveChat.chat,
             latestMessage: {
-              text: newMessage.text,
+              text: newMessage.text || "",
               sender: newMessage.sender,
             },
             updatedAt: new Date().toString(),
@@ -166,7 +166,7 @@ const ChatApp = () => {
     }
   }
 
-  const handleMessageSend = async (e: any, imageFile?: File | null) => {
+  const handleMessageSend = async (e: React.FormEvent, imageFile?: File | null) => {
     e.preventDefault();
 
     if (!message.trim() && !imageFile) return;
@@ -234,8 +234,12 @@ const ChatApp = () => {
         },
         false
       );
-    } catch (error: any) {
-      toast.error(error.response.data.message);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     }
   };
 
@@ -339,7 +343,7 @@ const ChatApp = () => {
       socket?.off("userTyping");
       socket?.off("userStoppedTyping");
     };
-  }, [socket, selectedUser, setChats, loggedInUser?._id]);
+  }, [socket, selectedUser, setChats, loggedInUser?._id, moveChatToTop]);
 
   useEffect(() => {
     if (selectedUser) {
@@ -355,7 +359,7 @@ const ChatApp = () => {
         setMessages(null);
       };
     }
-  }, [selectedUser, socket]);
+  }, [selectedUser, socket, fetchChat, resetUnseenCount]);
 
   useEffect(() => {
     return () => {
