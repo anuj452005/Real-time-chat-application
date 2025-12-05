@@ -3,7 +3,7 @@ import ChatSidebar from "@/components/ChatSidebar";
 import Loading from "@/components/Loading";
 import { chat_service, useAppData, User } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
 import axios from "axios";
@@ -62,7 +62,7 @@ const ChatApp = () => {
 
   const handleLogout = () => logoutUser();
 
-  async function fetchChat() {
+  const fetchChat = useCallback(async () => {
     const token = Cookies.get("token");
     try {
       const { data } = await axios.get(
@@ -81,9 +81,9 @@ const ChatApp = () => {
       console.log(error);
       toast.error("Failed to load messages");
     }
-  }
+  }, [selectedUser, fetchChats]);
 
-  const moveChatToTop = (
+  const moveChatToTop = useCallback((
     chatId: string,
     newMessage: Partial<Message> & { text?: string; sender: string },
     updatedUnseenCount = true
@@ -121,9 +121,9 @@ const ChatApp = () => {
 
       return updatedChats;
     });
-  };
+  }, [setChats, loggedInUser?._id]);
 
-  const resetUnseenCount = (chatId: string) => {
+  const resetUnseenCount = useCallback((chatId: string) => {
     setChats((prev) => {
       if (!prev) return null;
 
@@ -140,7 +140,7 @@ const ChatApp = () => {
         return chat;
       });
     });
-  };
+  }, [setChats]);
 
   async function createChat(u: User) {
     try {
@@ -161,7 +161,7 @@ const ChatApp = () => {
       setSelectedUser(data.chatId);
       setShowAllUser(false);
       await fetchChats();
-    } catch (error) {
+    } catch {
       toast.error("Failed to start chat");
     }
   }
