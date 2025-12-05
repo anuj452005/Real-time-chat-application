@@ -1,0 +1,70 @@
+flowchart LR
+    %% Nodes
+    subgraph Client[Client - NextJS]
+        UI[Pages & Components]
+    end
+
+    subgraph Gateway[API Gateway / NextJS Routes]
+        NG[NextJS Route Handlers]
+    end
+
+    subgraph UserService[User Service]
+        USAPI[Express API]
+        USDB[(MongoDB Users)]
+    end
+
+    subgraph GroupMessageService[Group Message Service]
+        GSAPI[Express API]
+        GSSocket[Socket.io Server]
+        GSDB[(MongoDB Groups/Members/Messages)]
+    end
+
+    subgraph Infra[Shared Infra]
+        REDIS[(Redis)]
+        MQ[(RabbitMQ)]
+    end
+
+    %% Client interactions
+    UI -->|Create/Manage Groups HTTP| NG
+    UI -->|Send/Read Group Messages HTTP| NG
+    UI <-->|WebSocket| GSSocket
+
+    %% Gateway to services
+    NG -->|api user HTTP| USAPI
+    NG -->|api group HTTP| GSAPI
+
+    %% Group Message Service internals
+    GSAPI --> GSDB
+    GSAPI -->|Group metadata cache| REDIS
+    GSSocket --> GSDB
+
+    %% Events (optional)
+    GSAPI -->|Publish group-events| MQ
+    MQ -->|Notify consumers| GSSocket
+
+    %% Auth flow
+    UI -.->|Bearer JWT| NG
+    NG -.->|Forward JWT| USAPI
+    UI -.->|JWT during handshake| GSSocket
+
+    %% Key operations
+    GSAPI -->|Create group| GSDB
+    GSAPI -->|Add/Remove members| GSDB
+    GSAPI -->|Set roles owner/admin/member| GSDB
+    GSAPI -->|Fetch messages/pagination| GSDB
+    GSSocket -->|Broadcast message to members| GSDB
+
+    %% Legends
+    classDef http stroke:#2b6cb0,stroke-width:2px;
+    classDef ws stroke:#38a169,stroke-width:2px;
+    classDef amqp stroke:#d69e2e,stroke-width:2px;
+    classDef db fill:#1a202c,color:#fff,stroke:#4a5568;
+
+    %% Style links
+    linkStyle 0,1,2 stroke:#2b6cb0,stroke-width:2px;
+    linkStyle 3 stroke:#38a169,stroke-width:2px;
+    linkStyle 4,5 stroke:#2b6cb0,stroke-width:2px;
+    linkStyle 9 stroke:#2b6cb0,stroke-width:2px;
+    linkStyle 10 stroke:#d69e2e,stroke-width:2px;
+    linkStyle 11 stroke:#d69e2e,stroke-width:2px;
+

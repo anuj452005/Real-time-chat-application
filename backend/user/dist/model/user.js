@@ -39,11 +39,74 @@ const schema = new mongoose_1.Schema({
     name: {
         type: String,
         required: true,
+        trim: true,
+        maxlength: 50,
     },
     email: {
         type: String,
         required: true,
         unique: true,
+        lowercase: true,
+        trim: true,
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true, // Allows null values and still maintains uniqueness
+    },
+    authProvider: {
+        type: String,
+        enum: ["email", "google"],
+        default: "email",
+    },
+    avatar: {
+        url: {
+            type: String,
+            default: null,
+        },
+        publicId: {
+            type: String,
+            default: null,
+        },
+    },
+    status: {
+        type: String,
+        enum: ["online", "offline", "away", "busy"],
+        default: "offline",
+    },
+    lastSeen: {
+        type: Date,
+        default: Date.now,
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
+    },
+    preferences: {
+        notifications: {
+            email: {
+                type: Boolean,
+                default: true,
+            },
+            push: {
+                type: Boolean,
+                default: true,
+            },
+            sound: {
+                type: Boolean,
+                default: true,
+            },
+        },
+        privacy: {
+            showLastSeen: {
+                type: Boolean,
+                default: true,
+            },
+            showOnlineStatus: {
+                type: Boolean,
+                default: true,
+            },
+        },
     },
 }, {
     timestamps: true,

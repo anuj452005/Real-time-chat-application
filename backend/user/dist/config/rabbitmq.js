@@ -8,13 +8,7 @@ const amqplib_1 = __importDefault(require("amqplib"));
 let channel;
 const connectRabbitMQ = async () => {
     try {
-        const connection = await amqplib_1.default.connect({
-            protocol: "amqp",
-            hostname: process.env.Rabbitmq_Host,
-            port: 5672,
-            username: process.env.Rabbitmq_Username,
-            password: process.env.Rabbitmq_Password,
-        });
+        const connection = await amqplib_1.default.connect(process.env.RABBITMQ_URL);
         channel = await connection.createChannel();
         console.log("✅ connected to rabbitmq");
     }

@@ -1,0 +1,1 @@
+tell me how the private and group chatting works and hwo the user shows the online, read satus , seen and other thing from start to end in simple lanague i have to tell intervierw

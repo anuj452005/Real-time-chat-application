@@ -21,11 +21,11 @@ export const loginUser = TryCatch(async (req, res) => {
 
   const otpKey = `otp:${email}`;
   await redisClient.set(otpKey, otp, {
-    EX: 300,
+    ex: 300,
   });
 
   await redisClient.set(rateLimitKey, "true", {
-    EX: 60,
+    ex: 10, // Rate limit: 10 seconds between OTP requests
   });
 
   const message = {
@@ -35,6 +35,9 @@ export const loginUser = TryCatch(async (req, res) => {
   };
 
   await publishToQueue("send-otp", message);
+
+  // DEBUG: Log OTP to console (remove in production)
+  console.log(`📧 OTP for ${email}: ${otp}`);
 
   res.status(200).json({
     message: "OTP sent to your mail",
@@ -55,7 +58,18 @@ export const verifyUser = TryCatch(async (req, res) => {
 
   const storedOtp = await redisClient.get(otpKey);
 
-  if (!storedOtp || storedOtp !== enteredOtp) {
+  // Convert both to strings for comparison
+  const storedOtpStr = storedOtp ? String(storedOtp) : null;
+  const enteredOtpStr = String(enteredOtp);
+
+  console.log("🔍 OTP Debug:", {
+    email,
+    enteredOtp: enteredOtpStr,
+    storedOtp: storedOtpStr,
+    match: storedOtpStr === enteredOtpStr
+  });
+
+  if (!storedOtpStr || storedOtpStr !== enteredOtpStr) {
     res.status(400).json({
       message: "Invalid or expired OTP",
     });
@@ -70,7 +84,7 @@ export const verifyUser = TryCatch(async (req, res) => {
     const name = email.slice(0, 8);
     user = await User.create({ name, email });
   }
-  
+
 
   const token = generateToken(user);
 
@@ -81,13 +95,13 @@ export const verifyUser = TryCatch(async (req, res) => {
   });
 });
 
-export const myProfile = TryCatch(async (req: AuthenticatedRequest, res) => {
+export const myProfile = TryCatch<AuthenticatedRequest>(async (req, res) => {
   const user = req.user;
 
   res.json(user);
 });
 
-export const updateName = TryCatch(async (req: AuthenticatedRequest, res) => {
+export const updateName = TryCatch<AuthenticatedRequest>(async (req, res) => {
   const user = await User.findById(req.user?._id);
 
   if (!user) {
@@ -110,7 +124,7 @@ export const updateName = TryCatch(async (req: AuthenticatedRequest, res) => {
   });
 });
 
-export const getAllUsers = TryCatch(async (req: AuthenticatedRequest, res) => {
+export const getAllUsers = TryCatch<AuthenticatedRequest>(async (req, res) => {
   const users = await User.find();
 
   res.json(users);
@@ -120,4 +134,22 @@ export const getAUser = TryCatch(async (req, res) => {
   const user = await User.findById(req.params.id);
 
   res.json(user);
+});
+
+// Google OAuth Callback Handler
+export const googleAuthCallback = TryCatch<AuthenticatedRequest>(async (req, res) => {
+  const user = req.user;
+
+  if (!user) {
+    res.status(401).json({
+      message: "Authentication failed",
+    });
+    return;
+  }
+
+  const token = generateToken(user);
+
+  // Redirect to frontend with token
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+  res.redirect(`${frontendUrl}/auth/callback?token=${token}`);
 });

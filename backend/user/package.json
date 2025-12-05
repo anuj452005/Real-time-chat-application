@@ -13,21 +13,27 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@upstash/redis": "^1.35.7",
     "amqplib": "^0.10.8",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
+    "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.1",
-    "redis": "^5.5.6"
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.7",
     "@types/cors": "^2.8.19",
     "@types/dotenv": "^8.2.3",
     "@types/express": "^5.0.3",
+    "@types/express-session": "^1.18.2",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/mongoose": "^5.11.97",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.17",
     "@types/redis": "^4.0.11",
     "concurrently": "^9.2.0",
     "nodemon": "^3.1.10"

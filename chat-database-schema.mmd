@@ -1,0 +1,139 @@
+erDiagram
+    User {
+        ObjectId _id PK
+        string name
+        string email UK
+        object avatar
+        string status
+        date lastSeen
+        boolean isActive
+        object preferences
+        date createdAt
+        date updatedAt
+    }
+
+    Chat {
+        ObjectId _id PK
+        string chatType
+        array participants FK
+        string name
+        string description
+        object avatar
+        ObjectId createdBy FK
+        array admins FK
+        boolean isActive
+        object settings
+        object latestMessage
+        map unreadCount
+        date createdAt
+        date updatedAt
+    }
+
+    Messages {
+        ObjectId _id PK
+        ObjectId chatId FK
+        ObjectId sender FK
+        string text
+        array attachments
+        string messageType
+        ObjectId replyTo FK
+        ObjectId forwardedFrom FK
+        boolean edited
+        date editedAt
+        boolean deleted
+        date deletedAt
+        ObjectId deletedBy FK
+        map reactions
+        boolean isPinned
+        ObjectId pinnedBy FK
+        date pinnedAt
+        map readBy
+        map deliveredTo
+        date createdAt
+        date updatedAt
+    }
+
+    Notification {
+        ObjectId _id PK
+        ObjectId recipient FK
+        ObjectId sender FK
+        ObjectId chatId FK
+        ObjectId messageId FK
+        string type
+        string title
+        string body
+        object data
+        boolean isRead
+        date readAt
+        string priority
+        object channels
+        date scheduledFor
+        date expiresAt
+        date createdAt
+        date updatedAt
+    }
+
+    MessageReadStatus {
+        ObjectId _id PK
+        ObjectId messageId FK
+        ObjectId chatId FK
+        ObjectId userId FK
+        date readAt
+        date deliveredAt
+        date createdAt
+        date updatedAt
+    }
+
+    GroupInvitation {
+        ObjectId _id PK
+        ObjectId chatId FK
+        ObjectId invitedBy FK
+        ObjectId invitedUser FK
+        string status
+        string message
+        date expiresAt
+        date respondedAt
+        date createdAt
+        date updatedAt
+    }
+
+    UserPresence {
+        ObjectId _id PK
+        ObjectId userId FK
+        string status
+        date lastSeen
+        boolean isTyping
+        ObjectId typingIn FK
+        object deviceInfo
+        string socketId
+        date createdAt
+        date updatedAt
+    }
+
+    %% Relationships
+    User ||--o{ Chat : "creates"
+    User ||--o{ Chat : "participates in"
+    User ||--o{ Chat : "admins"
+    
+    Chat ||--o{ Messages : "contains"
+    User ||--o{ Messages : "sends"
+    Messages ||--o| Messages : "replies to"
+    Messages ||--o| Messages : "forwards from"
+    User ||--o{ Messages : "deletes"
+    User ||--o{ Messages : "pins"
+    
+    User ||--o{ Notification : "receives"
+    User ||--o{ Notification : "sends"
+    Chat ||--o{ Notification : "triggers"
+    Messages ||--o{ Notification : "triggers"
+    
+    Messages ||--o{ MessageReadStatus : "has read status"
+    User ||--o{ MessageReadStatus : "reads"
+    Chat ||--o{ MessageReadStatus : "belongs to"
+    
+    Chat ||--o{ GroupInvitation : "has invitations"
+    User ||--o{ GroupInvitation : "invites"
+    User ||--o{ GroupInvitation : "receives invitation"
+    
+    User ||--|| UserPresence : "has presence"
+    Chat ||--o{ UserPresence : "typing in"

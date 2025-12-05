@@ -1,7 +1,13 @@
-import { NextFunction, Request, RequestHandler, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
-const TryCatch = (handler: RequestHandler): RequestHandler => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+type AsyncRequestHandler<T = Request> = (
+  req: T,
+  res: Response,
+  next: NextFunction
+) => Promise<void | any>;
+
+const TryCatch = <T = Request>(handler: AsyncRequestHandler<T>) => {
+  return async (req: T, res: Response, next: NextFunction) => {
     try {
       await handler(req, res, next);
     } catch (error: any) {

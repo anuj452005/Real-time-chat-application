@@ -1,0 +1,145 @@
+flowchart LR
+  %% Low-Level Design (LLD) for Group Message Service
+
+  %% Client
+  subgraph Client["Client - NextJS"]
+    UI["Pages: groups, group chat"]
+    UI -->|HTTP fetch| NG
+    UI <-->|Socket io| GSSocket
+  end
+
+  %% API Gateway / Next Route Handlers
+  subgraph Gateway["API Gateway / NextJS Route Handlers"]
+    NG["Route Handlers: /api/group/*"]
+    Headers["Headers"]
+    NG -.->|Attach Authorization Bearer JWT| Headers
+  end
+
+  %% GROUP MESSAGE SERVICE
+  subgraph GroupService["Group Message Service - Express + Socket io"]
+    GSIndex["index.ts - Express + Socket io"]
+
+    subgraph GSRoutes["Routes"]
+      GSR1_LIST_GROUPS["GET /api/group"]
+      GSR2_CREATE_GROUP["POST /api/group"]
+      GSR3_UPDATE_GROUP["PATCH /api/group/:groupId"]
+      GSR4_ADD_MEMBER["POST /api/group/:groupId/members"]
+      GSR5_REMOVE_MEMBER["DELETE /api/group/:groupId/members/:userId"]
+      GSR6_SET_ROLE["PATCH /api/group/:groupId/members/:userId/role"]
+      GSR7_LIST_MESSAGES["GET /api/group/:groupId/messages"]
+      GSR8_SEND_MESSAGE["POST /api/group/:groupId/messages"]
+      GSR9_UPLOAD["POST /api/group/upload"]
+    end
+
+    subgraph GSMW["Middlewares"]
+      GSMW1["isAuth.ts verify JWT"]
+      GSMW2["multer.ts file uploads"]
+      GSMW3["tryCatch.ts error wrapper"]
+      GSMW4["authorize.ts owner admin member checks"]
+    end
+
+    subgraph GSControllers["Controllers"]
+      GSC1["listGroups"]
+      GSC2["createGroup"]
+      GSC3["updateGroup"]
+      GSC4["addMember"]
+      GSC5["removeMember"]
+      GSC6["setMemberRole"]
+      GSC7["listMessages"]
+      GSC8["sendMessage"]
+      GSC9["uploadMedia"]
+    end
+
+    subgraph GSSocket["Socket io Server"]
+      GSE1_CONNECTION["connection"]
+      GSE2_JOIN_GROUP["join_group - groupId"]
+      GSE3_LEAVE_GROUP["leave_group - groupId"]
+      GSE4_SEND_MESSAGE["send_group_message - groupId text media"]
+      GSE5_TYPING["typing - groupId"]
+      GSE6_MESSAGE_DELIVERED["message_delivered - messageId"]
+      GSE7_MESSAGE_READ["message_read - messageId"]
+      GSSAuth["Handshake JWT verify"]
+    end
+
+    subgraph GroupDB["MongoDB"]
+      GSCol1[(groups: _id name ownerId createdAt updatedAt)]
+      GSCol2[(group_members: _id groupId userId role joinedAt)]
+      GSCol3[(group_messages: _id groupId senderId text mediaUrl createdAt deliveredAtOpt readByList)]
+    end
+
+    subgraph GSCloud["Cloudinary"]
+      GSCLOUD1["upload image video -> url"]
+    end
+
+    subgraph GSCache["Redis Keys"]
+      GSCACHE1[(group_meta groupId -> name ownerId counts)]
+      GSCACHE2[(group_members groupId -> userIds roles)]
+      GSCACHE3[(rate_limit ip user -> counter EX 60s)]
+    end
+
+    GSIndex --> GSRoutes
+    GSR1_LIST_GROUPS -->|GSMW1| GSC1 --> GSCol1
+    GSR2_CREATE_GROUP -->|GSMW1| GSC2 --> GSCol1
+    GSR3_UPDATE_GROUP -->|GSMW1 GSMW4 owner admin| GSC3 --> GSCol1
+    GSR4_ADD_MEMBER -->|GSMW1 GSMW4 owner admin| GSC4 --> GSCol2
+    GSR5_REMOVE_MEMBER -->|GSMW1 GSMW4 owner admin| GSC5 --> GSCol2
+    GSR6_SET_ROLE -->|GSMW1 GSMW4 owner only| GSC6 --> GSCol2
+    GSR7_LIST_MESSAGES -->|GSMW1 GSMW4 member check| GSC7 --> GSCol3
+    GSR8_SEND_MESSAGE -->|GSMW1 GSMW4 member check| GSC8 --> GSCol3
+    GSR9_UPLOAD -->|GSMW1 GSMW2| GSC9 --> GSCloud --> GSC8
+
+    %% Socket flows
+    GSSocket --> GSSAuth
+    GSE2_JOIN_GROUP -->|socket join group| GSSocket
+    GSE3_LEAVE_GROUP -->|socket leave group| GSSocket
+    GSE4_SEND_MESSAGE -->|persist| GSCol3
+    GSE4_SEND_MESSAGE -->|emit to group room| GSSocket
+    GSE5_TYPING -->|broadcast typing| GSSocket
+    GSE6_MESSAGE_DELIVERED -->|update ack| GSCol3
+    GSE7_MESSAGE_READ -->|append readBy| GSCol3
+  end
+
+  %% INFRA
+  subgraph Infra["Shared Infra"]
+    MQ["RabbitMQ"]
+    REDIS["Redis"]
+    MONGO["MongoDB Cluster"]
+  end
+
+  %% Connections between services and infra
+  GSCol1 --- MONGO
+  GSCol2 --- MONGO
+  GSCol3 --- MONGO
+  GSCACHE1 --- REDIS
+  GSCACHE2 --- REDIS
+  GSCACHE3 --- REDIS
+
+  %% Optional async events (fanout to other services like notifications)
+  subgraph GSEvents["RabbitMQ Topics"]
+    GSEX["exchange group.topic"]
+    GSRK1["routing key group.created"]
+    GSRK2["routing key group.member.added"]
+    GSRK3["routing key group.message.created"]
+    GSPayload["payload groupId actorId metadata"]
+  end
+  GSC2 -->|Publish group.created| GSEvents
+  GSC4 -->|Publish group.member.added| GSEvents
+  GSC8 -->|Publish group.message.created| GSEvents
+  GSEX --- MQ
+
+  %% Auth details
+  Headers -.->|Authorization Bearer JWT| GSMW1
+  GSSAuth -.->|query token auth header| JWTVerify["verify attach userId"]
+
+  %% Styles & Legends
+  classDef http stroke:#2b6cb0 stroke-width:2px
+  classDef ws stroke:#38a169 stroke-width:2px
+  classDef amqp stroke:#d69e2e stroke-width:2px
+  classDef db fill:#1a202c color:#fff stroke:#4a5568
+  classDef cache fill:#553c9a color:#fff stroke:#6b46c1
+
+  class NG,GSR1_LIST_GROUPS,GSR2_CREATE_GROUP,GSR3_UPDATE_GROUP,GSR4_ADD_MEMBER,GSR5_REMOVE_MEMBER,GSR6_SET_ROLE,GSR7_LIST_MESSAGES,GSR8_SEND_MESSAGE,GSR9_UPLOAD http
+  class GSSocket ws
+  class GSEX amqp
+  class GSCol1,GSCol2,GSCol3,MONGO db
+  class GSCACHE1,GSCACHE2,GSCACHE3,REDIS cache

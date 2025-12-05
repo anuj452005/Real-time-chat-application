@@ -13,7 +13,7 @@ export const createNewChat = TryCatch(async (req, res) => {
         return;
     }
     const existingChat = await Chat.findOne({
-        users: { $all: [userId, otherUserId], $size: 2 },
+        participants: { $all: [userId, otherUserId], $size: 2 },
     });
     if (existingChat) {
         res.json({
@@ -23,7 +23,10 @@ export const createNewChat = TryCatch(async (req, res) => {
         return;
     }
     const newChat = await Chat.create({
-        users: [userId, otherUserId],
+        chatType: "private",
+        participants: [userId, otherUserId],
+        createdBy: userId,
+        admins: [],
     });
     res.status(201).json({
         message: "New Chat created",
@@ -38,9 +41,9 @@ export const getAllChats = TryCatch(async (req, res) => {
         });
         return;
     }
-    const chats = await Chat.find({ users: userId }).sort({ updatedAt: -1 });
+    const chats = await Chat.find({ participants: userId }).sort({ updatedAt: -1 });
     const chatWithUserData = await Promise.all(chats.map(async (chat) => {
-        const otherUserId = chat.users.find((id) => id !== userId);
+        const otherUserId = chat.participants.find((id) => id.toString() !== userId?.toString());
         const unseenCount = await Messages.countDocuments({
             chatId: chat._id,
             sender: { $ne: userId },
@@ -102,14 +105,14 @@ export const sendMessage = TryCatch(async (req, res) => {
         });
         return;
     }
-    const isUserInChat = chat.users.some((userId) => userId.toString() === senderId.toString());
+    const isUserInChat = chat.participants.some((participantId) => participantId.toString() === senderId.toString());
     if (!isUserInChat) {
         res.status(403).json({
             message: "You are not a participant of this chat",
         });
         return;
     }
-    const otherUserId = chat.users.find((userId) => userId.toString() !== senderId.toString());
+    const otherUserId = chat.participants.find((participantId) => participantId.toString() !== senderId.toString());
     if (!otherUserId) {
         res.status(401).json({
             message: "No other user",
@@ -196,7 +199,7 @@ export const getMessagesByChat = TryCatch(async (req, res) => {
         });
         return;
     }
-    const isUserInChat = chat.users.some((userId) => userId.toString() === userId.toString());
+    const isUserInChat = chat.participants.some((participantId) => participantId.toString() === userId?.toString());
     if (!isUserInChat) {
         res.status(403).json({
             message: "You are not a participant of this chat",
@@ -217,7 +220,7 @@ export const getMessagesByChat = TryCatch(async (req, res) => {
         seenAt: new Date(),
     });
     const messages = await Messages.find({ chatId }).sort({ createdAt: 1 });
-    const otherUserId = chat.users.find((id) => id !== userId);
+    const otherUserId = chat.participants.find((id) => id.toString() !== userId?.toString());
     try {
         const { data } = await axios.get(`${process.env.USER_SERVICE}/api/v1/user/${otherUserId}`);
         if (!otherUserId) {
