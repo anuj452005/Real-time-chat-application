@@ -32,21 +32,35 @@ export const SocketProvider = ({ children }: ProviderProps) => {
   useEffect(() => {
     if (!user?._id) return;
 
-    const newSocket = io(chat_service, {
-      query: {
-        userId: user._id,
-      },
-    });
+    // Check if chat_service URL is defined
+    if (!chat_service) {
+      console.error("Chat service URL is not defined");
+      return;
+    }
 
-    setSocket(newSocket);
+    try {
+      const newSocket = io(chat_service, {
+        query: {
+          userId: user._id,
+        },
+      });
 
-    newSocket.on("getOnlineUser", (users: string[]) => {
-      setOnlineUsers(users);
-    });
+      setSocket(newSocket);
 
-    return () => {
-      newSocket.disconnect();
-    };
+      newSocket.on("getOnlineUser", (users: string[]) => {
+        setOnlineUsers(users);
+      });
+
+      newSocket.on("connect_error", (error) => {
+        console.error("Socket connection error:", error);
+      });
+
+      return () => {
+        newSocket.disconnect();
+      };
+    } catch (error) {
+      console.error("Error initializing socket:", error);
+    }
   }, [user?._id]);
 
   return (
