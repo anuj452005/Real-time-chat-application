@@ -4,6 +4,11 @@
 body {
   background: #111b21;
   color: #e9edef;
+  /* Safe area padding for notched devices */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Chat sidebar */
@@ -61,6 +66,13 @@ body {
   border-radius: 8px;
 }
 
+/* Mobile: Thinner scrollbar */
+@media (max-width: 768px) {
+  .custom-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+}
+
 /* Chat bubble border radius for WhatsApp look */
 .rounded-lg {
   border-radius: 18px !important;
@@ -101,4 +113,74 @@ body {
 *:focus {
   outline: none !important;
   box-shadow: none !important;
+}
+
+/* ===== MOBILE RESPONSIVENESS IMPROVEMENTS ===== */
+
+/* Touch target sizing - minimum 44x44px for touch devices */
+@media (hover: none) and (pointer: coarse) {
+  button, a, input[type="button"], input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Smooth transitions for interactive elements */
+button, a, input, textarea {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Mobile typography improvements */
+@media (max-width: 640px) {
+  /* Smaller headings on mobile */
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Better line height for readability */
+  body {
+    line-height: 1.5;
+  }
+  
+  /* Optimize input text size to prevent zoom on iOS */
+  input, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  h1 {
+    font-size: 2rem !important;
+  }
+  h2 {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* Prevent text selection on touch devices for better UX */
+@media (hover: none) and (pointer: coarse) {
+  button, .chat-item, .user-item {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+}
+
+/* Better mobile viewport handling */
+@supports (-webkit-touch-callout: none) {
+  /* iOS-specific styles */
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Improve button press feedback on mobile */
+@media (hover: none) and (pointer: coarse) {
+  button:active {
+    transform: scale(0.97);
+  }
 }
