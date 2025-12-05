@@ -25,7 +25,7 @@ export const loginUser = TryCatch(async (req, res) => {
   });
 
   await redisClient.set(rateLimitKey, "true", {
-    ex: 10, // Rate limit: 10 seconds between OTP requests
+    ex: 1, // Rate limit: 10 seconds between OTP requests
   });
 
   const message = {
