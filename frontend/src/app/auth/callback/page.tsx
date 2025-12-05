@@ -1,10 +1,10 @@
 "use client";
 import Loading from "@/components/Loading";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import toast from "react-hot-toast";
 
-const AuthCallbackPage = () => {
+const AuthCallbackContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -25,6 +25,14 @@ const AuthCallbackPage = () => {
     }, [searchParams, router]);
 
     return <Loading />;
+};
+
+const AuthCallbackPage = () => {
+    return (
+        <Suspense fallback={<Loading />}>
+            <AuthCallbackContent />
+        </Suspense>
+    );
 };
 
 export default AuthCallbackPage;
