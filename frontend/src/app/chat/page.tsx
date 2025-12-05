@@ -81,7 +81,7 @@ const ChatApp = () => {
       console.log(error);
       toast.error("Failed to load messages");
     }
-  }, [selectedUser, fetchChats]);
+  }, [selectedUser]); // Remove fetchChats from dependencies to prevent infinite loop
 
   const moveChatToTop = useCallback((
     chatId: string,
